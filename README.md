@@ -83,6 +83,7 @@ The app and installer are unsigned. Windows Application Control, Smart App Contr
 - Reads endpoint volume and mute state when available.
 - Sets endpoint volume and mute state when available.
 - Provides 0%, 30%, 35%, 40%, 45%, and 60% volume preset buttons. Clicking a preset also unmutes the endpoint.
+- Provides Meeting (mic 40%, output 45%), Private (both muted at 0%), and Media (mic muted at 0%, output 35%) quick presets.
 - Shows a live microphone peak meter when available.
 - Lists local cameras.
 - Starts and stops local camera preview.

@@ -38,9 +38,41 @@
                     <RowDefinition Height="Auto" />
                     <RowDefinition Height="Auto" />
                     <RowDefinition Height="Auto" />
+                    <RowDefinition Height="Auto" />
                 </Grid.RowDefinitions>
 
                 <Grid Grid.Row="0" Margin="0,0,0,10">
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="*" />
+                        <ColumnDefinition Width="*" />
+                        <ColumnDefinition Width="*" />
+                    </Grid.ColumnDefinitions>
+                    <Button Command="{Binding Main.ApplyMeetingPresetCommand}"
+                            Margin="0,0,4,0">
+                        <StackPanel Orientation="Horizontal">
+                            <TextBlock Text="&#xE716;" Style="{StaticResource IconStyle}" />
+                            <TextBlock Text="Meeting" />
+                        </StackPanel>
+                    </Button>
+                    <Button Grid.Column="1"
+                            Command="{Binding Main.ApplyPrivatePresetCommand}"
+                            Margin="4,0,4,0">
+                        <StackPanel Orientation="Horizontal">
+                            <TextBlock Text="&#xE72E;" Style="{StaticResource IconStyle}" />
+                            <TextBlock Text="Private" />
+                        </StackPanel>
+                    </Button>
+                    <Button Grid.Column="2"
+                            Command="{Binding Main.ApplyMediaPresetCommand}"
+                            Margin="4,0,0,0">
+                        <StackPanel Orientation="Horizontal">
+                            <TextBlock Text="&#xE8D6;" Style="{StaticResource IconStyle}" />
+                            <TextBlock Text="Media" />
+                        </StackPanel>
+                    </Button>
+                </Grid>
+
+                <Grid Grid.Row="1" Margin="0,0,0,10">
                     <Grid.ColumnDefinitions>
                         <ColumnDefinition Width="*" />
                         <ColumnDefinition Width="*" />
@@ -63,7 +95,7 @@
                     </Button>
                 </Grid>
 
-                <Border Grid.Row="1"
+                <Border Grid.Row="2"
                         Background="{StaticResource SubtleSurfaceBrush}"
                         BorderBrush="{StaticResource BorderBrushSoft}"
                         BorderThickness="1"
@@ -144,7 +176,7 @@
                     </Grid>
                 </Border>
 
-                <Border Grid.Row="2"
+                <Border Grid.Row="3"
                         Background="{StaticResource SubtleSurfaceBrush}"
                         BorderBrush="{StaticResource BorderBrushSoft}"
                         BorderThickness="1"
@@ -207,21 +239,23 @@
                                        VerticalAlignment="Center"
                                        TextAlignment="Right" />
 
-                            <TextBlock Grid.Row="1"
-                                       Text="Set"
-                                       Style="{StaticResource CaptionStyle}"
-                                       VerticalAlignment="Center"
-                                       Margin="0,8,10,0" />
-                            <controls:VolumePresetStrip Grid.Row="1"
-                                                         Grid.Column="1"
-                                                         Grid.ColumnSpan="2"
-                                                         ZeroCommand="{Binding Main.SetInputVolume0Command}"
-                                                         ThirtyCommand="{Binding Main.SetInputVolume30Command}"
-                                                         ThirtyFiveCommand="{Binding Main.SetInputVolume35Command}"
-                                                         FortyCommand="{Binding Main.SetInputVolume40Command}"
-                                                         FortyFiveCommand="{Binding Main.SetInputVolume45Command}"
-                                                         SixtyCommand="{Binding Main.SetInputVolume60Command}"
-                                                         Margin="0,8,0,0" />
+                            <Grid Grid.Row="1" Grid.ColumnSpan="3" Margin="0,8,0,0">
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="Auto" />
+                                    <ColumnDefinition Width="*" />
+                                </Grid.ColumnDefinitions>
+                                <TextBlock Text="Set"
+                                           Style="{StaticResource CaptionStyle}"
+                                           VerticalAlignment="Center"
+                                           Margin="0,0,10,0" />
+                                <controls:VolumePresetStrip Grid.Column="1"
+                                                             ZeroCommand="{Binding Main.SetInputVolume0Command}"
+                                                             ThirtyCommand="{Binding Main.SetInputVolume30Command}"
+                                                             ThirtyFiveCommand="{Binding Main.SetInputVolume35Command}"
+                                                             FortyCommand="{Binding Main.SetInputVolume40Command}"
+                                                             FortyFiveCommand="{Binding Main.SetInputVolume45Command}"
+                                                             SixtyCommand="{Binding Main.SetInputVolume60Command}" />
+                            </Grid>
 
                             <TextBlock Grid.Row="2"
                                        Text="Meter"
@@ -248,7 +282,7 @@
                     </Grid>
                 </Border>
 
-                <Border Grid.Row="3"
+                <Border Grid.Row="4"
                         Background="{StaticResource SubtleSurfaceBrush}"
                         BorderBrush="{StaticResource BorderBrushSoft}"
                         BorderThickness="1"
@@ -286,7 +320,7 @@
                     </Grid>
                 </Border>
 
-                <Grid Grid.Row="4">
+                <Grid Grid.Row="5">
                     <Grid.RowDefinitions>
                         <RowDefinition Height="Auto" />
                         <RowDefinition Height="Auto" />

@@ -2,7 +2,7 @@
              x:Name="Root"
              xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
-    <StackPanel Orientation="Horizontal">
+    <WrapPanel Orientation="Horizontal">
         <Button Command="{Binding ZeroCommand, ElementName=Root}"
                 Style="{StaticResource PresetButtonStyle}">
             <TextBlock Text="0%" />
@@ -28,5 +28,5 @@
                 Margin="0">
             <TextBlock Text="60%" />
         </Button>
-    </StackPanel>
+    </WrapPanel>
 </UserControl>

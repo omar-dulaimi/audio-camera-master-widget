@@ -46,6 +46,9 @@ public sealed class MainViewModel : ObservableObject, IAsyncDisposable
         RefreshCamerasCommand = new AsyncRelayCommand(RefreshCamerasAsync);
         RefreshAllDevicesCommand = new AsyncRelayCommand(RefreshAllDevicesAsync);
         MuteAllCommand = new RelayCommand(MuteAll, () => CanControlOutputMute || CanControlInputMute);
+        ApplyMeetingPresetCommand = new RelayCommand(ApplyMeetingPreset, CanApplyScenarioPreset);
+        ApplyPrivatePresetCommand = new RelayCommand(ApplyPrivatePreset, CanApplyScenarioPreset);
+        ApplyMediaPresetCommand = new RelayCommand(ApplyMediaPreset, CanApplyScenarioPreset);
 
         ToggleOutputMuteCommand = OutputEndpoint.ToggleMuteCommand;
         ToggleInputMuteCommand = InputEndpoint.ToggleMuteCommand;
@@ -115,6 +118,12 @@ public sealed class MainViewModel : ObservableObject, IAsyncDisposable
     public RelayCommand ToggleInputMuteCommand { get; }
 
     public RelayCommand MuteAllCommand { get; }
+
+    public RelayCommand ApplyMeetingPresetCommand { get; }
+
+    public RelayCommand ApplyPrivatePresetCommand { get; }
+
+    public RelayCommand ApplyMediaPresetCommand { get; }
 
     public AsyncRelayCommand RefreshAllDevicesCommand { get; }
 
@@ -284,6 +293,36 @@ public sealed class MainViewModel : ObservableObject, IAsyncDisposable
         await RefreshCamerasAsync();
     }
 
+    private void ApplyMeetingPreset()
+    {
+        OutputEndpoint.ApplyVolumePreset(45);
+        InputEndpoint.ApplyVolumePreset(40);
+    }
+
+    private void ApplyPrivatePreset()
+    {
+        OutputEndpoint.ApplyVolumePreset(0, mute: true);
+        InputEndpoint.ApplyVolumePreset(0, mute: true);
+    }
+
+    private void ApplyMediaPreset()
+    {
+        OutputEndpoint.ApplyVolumePreset(35);
+        InputEndpoint.ApplyVolumePreset(0, mute: true);
+    }
+
+    private bool CanApplyScenarioPreset()
+    {
+        return CanControlOutputVolume || CanControlInputVolume || CanControlOutputMute || CanControlInputMute;
+    }
+
+    private void RaiseScenarioPresetCanExecuteChanged()
+    {
+        ApplyMeetingPresetCommand.RaiseCanExecuteChanged();
+        ApplyPrivatePresetCommand.RaiseCanExecuteChanged();
+        ApplyMediaPresetCommand.RaiseCanExecuteChanged();
+    }
+
     private void MuteAll()
     {
         var changedAny = false;
@@ -382,10 +421,12 @@ public sealed class MainViewModel : ObservableObject, IAsyncDisposable
                 break;
             case nameof(AudioEndpointViewModel.CanControlVolume):
                 OnPropertyChanged(nameof(CanControlOutputVolume));
+                RaiseScenarioPresetCanExecuteChanged();
                 break;
             case nameof(AudioEndpointViewModel.CanControlMute):
                 OnPropertyChanged(nameof(CanControlOutputMute));
                 MuteAllCommand.RaiseCanExecuteChanged();
+                RaiseScenarioPresetCanExecuteChanged();
                 break;
             case nameof(AudioEndpointViewModel.DefaultText):
                 OnPropertyChanged(nameof(DefaultOutputText));
@@ -415,10 +456,12 @@ public sealed class MainViewModel : ObservableObject, IAsyncDisposable
                 break;
             case nameof(AudioEndpointViewModel.CanControlVolume):
                 OnPropertyChanged(nameof(CanControlInputVolume));
+                RaiseScenarioPresetCanExecuteChanged();
                 break;
             case nameof(AudioEndpointViewModel.CanControlMute):
                 OnPropertyChanged(nameof(CanControlInputMute));
                 MuteAllCommand.RaiseCanExecuteChanged();
+                RaiseScenarioPresetCanExecuteChanged();
                 break;
             case nameof(AudioEndpointViewModel.PeakLevel):
                 OnPropertyChanged(nameof(InputPeakLevel));

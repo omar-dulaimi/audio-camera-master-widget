@@ -36,12 +36,12 @@ public sealed class AudioEndpointViewModel : ObservableObject
         _statusText = _text.NotLoadedStatusText;
 
         ToggleMuteCommand = new RelayCommand(ToggleMute, () => SelectedDevice is not null && CanControlMute);
-        SetVolume0Command = new RelayCommand(() => SetVolumePreset(0), CanSetVolumePreset);
-        SetVolume30Command = new RelayCommand(() => SetVolumePreset(30), CanSetVolumePreset);
-        SetVolume35Command = new RelayCommand(() => SetVolumePreset(35), CanSetVolumePreset);
-        SetVolume40Command = new RelayCommand(() => SetVolumePreset(40), CanSetVolumePreset);
-        SetVolume45Command = new RelayCommand(() => SetVolumePreset(45), CanSetVolumePreset);
-        SetVolume60Command = new RelayCommand(() => SetVolumePreset(60), CanSetVolumePreset);
+        SetVolume0Command = new RelayCommand(() => ApplyVolumePreset(0), CanSetVolumePreset);
+        SetVolume30Command = new RelayCommand(() => ApplyVolumePreset(30), CanSetVolumePreset);
+        SetVolume35Command = new RelayCommand(() => ApplyVolumePreset(35), CanSetVolumePreset);
+        SetVolume40Command = new RelayCommand(() => ApplyVolumePreset(40), CanSetVolumePreset);
+        SetVolume45Command = new RelayCommand(() => ApplyVolumePreset(45), CanSetVolumePreset);
+        SetVolume60Command = new RelayCommand(() => ApplyVolumePreset(60), CanSetVolumePreset);
     }
 
     public event EventHandler? SelectedDeviceChanged;
@@ -276,7 +276,7 @@ public sealed class AudioEndpointViewModel : ObservableObject
         SetMuteState(!IsMuted);
     }
 
-    private void SetVolumePreset(double volumePercent)
+    public void ApplyVolumePreset(double volumePercent, bool mute = false)
     {
         var device = SelectedDevice;
         if (device is null)
@@ -284,22 +284,32 @@ public sealed class AudioEndpointViewModel : ObservableObject
             return;
         }
 
-        // Write the volume immediately (bypassing the slider debounce) so the
-        // unmute below never plays audio at the previous volume.
-        CancelPendingVolumeSet();
-        _isUpdatingState = true;
-        try
+        // Mute before lowering the volume, unmute only after raising it, so
+        // audio never plays at the previous volume in between.
+        if (mute && !IsMuted && CanControlMute)
         {
-            SelectedVolume = volumePercent;
-        }
-        finally
-        {
-            _isUpdatingState = false;
+            SetMuteState(true);
         }
 
-        SetVolumeCore(device.Id, volumePercent);
+        if (CanControlVolume)
+        {
+            // Write the volume immediately instead of waiting for the slider
+            // debounce, for the same reason.
+            CancelPendingVolumeSet();
+            _isUpdatingState = true;
+            try
+            {
+                SelectedVolume = volumePercent;
+            }
+            finally
+            {
+                _isUpdatingState = false;
+            }
 
-        if (IsMuted && CanControlMute)
+            SetVolumeCore(device.Id, volumePercent);
+        }
+
+        if (!mute && IsMuted && CanControlMute)
         {
             SetMuteState(false);
         }

@@ -150,6 +150,61 @@ public sealed class MainViewModelTests
     }
 
     [TestMethod]
+    public async Task MeetingPresetSetsBothEndpointsAndUnmutes()
+    {
+        var context = new TestContextBuilder()
+            .WithOutput("output-1", "Speakers", isDefault: true, volumePercent: 80, isMuted: true)
+            .WithInput("input-1", "Mic", isDefault: true, volumePercent: 10, isMuted: true)
+            .Build();
+        await context.ViewModel.InitializeAsync();
+
+        context.ViewModel.ApplyMeetingPresetCommand.Execute(null);
+
+        Assert.AreEqual(45, context.Audio.EndpointStates["output-1"].VolumePercent);
+        Assert.AreEqual(false, context.Audio.EndpointStates["output-1"].IsMuted);
+        Assert.AreEqual(40, context.Audio.EndpointStates["input-1"].VolumePercent);
+        Assert.AreEqual(false, context.Audio.EndpointStates["input-1"].IsMuted);
+        Assert.AreEqual(45, context.ViewModel.SelectedOutputVolume);
+        Assert.AreEqual(40, context.ViewModel.SelectedInputVolume);
+    }
+
+    [TestMethod]
+    public async Task PrivatePresetMutesBothEndpointsAtZeroVolume()
+    {
+        var context = new TestContextBuilder()
+            .WithOutput("output-1", "Speakers", isDefault: true, volumePercent: 50, isMuted: false)
+            .WithInput("input-1", "Mic", isDefault: true, volumePercent: 60, isMuted: false)
+            .Build();
+        await context.ViewModel.InitializeAsync();
+
+        context.ViewModel.ApplyPrivatePresetCommand.Execute(null);
+
+        Assert.AreEqual(0, context.Audio.EndpointStates["output-1"].VolumePercent);
+        Assert.AreEqual(true, context.Audio.EndpointStates["output-1"].IsMuted);
+        Assert.AreEqual(0, context.Audio.EndpointStates["input-1"].VolumePercent);
+        Assert.AreEqual(true, context.Audio.EndpointStates["input-1"].IsMuted);
+        Assert.IsTrue(context.ViewModel.IsOutputMuted);
+        Assert.IsTrue(context.ViewModel.IsInputMuted);
+    }
+
+    [TestMethod]
+    public async Task MediaPresetMutesMicAndSetsOutputVolume()
+    {
+        var context = new TestContextBuilder()
+            .WithOutput("output-1", "Speakers", isDefault: true, volumePercent: 80, isMuted: true)
+            .WithInput("input-1", "Mic", isDefault: true, volumePercent: 70, isMuted: false)
+            .Build();
+        await context.ViewModel.InitializeAsync();
+
+        context.ViewModel.ApplyMediaPresetCommand.Execute(null);
+
+        Assert.AreEqual(35, context.Audio.EndpointStates["output-1"].VolumePercent);
+        Assert.AreEqual(false, context.Audio.EndpointStates["output-1"].IsMuted);
+        Assert.AreEqual(0, context.Audio.EndpointStates["input-1"].VolumePercent);
+        Assert.AreEqual(true, context.Audio.EndpointStates["input-1"].IsMuted);
+    }
+
+    [TestMethod]
     public async Task MuteAllOnlyTouchesEndpointsThatSupportMute()
     {
         var context = new TestContextBuilder()
