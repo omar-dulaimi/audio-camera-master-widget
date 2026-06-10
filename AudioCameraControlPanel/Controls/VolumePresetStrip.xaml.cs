@@ -8,6 +8,8 @@ public partial class VolumePresetStrip : UserControl
 {
     public static readonly DependencyProperty ZeroCommandProperty = RegisterCommand(nameof(ZeroCommand));
     public static readonly DependencyProperty ThirtyCommandProperty = RegisterCommand(nameof(ThirtyCommand));
+    public static readonly DependencyProperty ThirtyFiveCommandProperty = RegisterCommand(nameof(ThirtyFiveCommand));
+    public static readonly DependencyProperty FortyCommandProperty = RegisterCommand(nameof(FortyCommand));
     public static readonly DependencyProperty FortyFiveCommandProperty = RegisterCommand(nameof(FortyFiveCommand));
     public static readonly DependencyProperty SixtyCommandProperty = RegisterCommand(nameof(SixtyCommand));
 
@@ -26,6 +28,18 @@ public partial class VolumePresetStrip : UserControl
     {
         get => (ICommand?)GetValue(ThirtyCommandProperty);
         set => SetValue(ThirtyCommandProperty, value);
+    }
+
+    public ICommand? ThirtyFiveCommand
+    {
+        get => (ICommand?)GetValue(ThirtyFiveCommandProperty);
+        set => SetValue(ThirtyFiveCommandProperty, value);
+    }
+
+    public ICommand? FortyCommand
+    {
+        get => (ICommand?)GetValue(FortyCommandProperty);
+        set => SetValue(FortyCommandProperty, value);
     }
 
     public ICommand? FortyFiveCommand

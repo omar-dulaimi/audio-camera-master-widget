@@ -51,10 +51,14 @@ public sealed class MainViewModel : ObservableObject, IAsyncDisposable
         ToggleInputMuteCommand = InputEndpoint.ToggleMuteCommand;
         SetOutputVolume0Command = OutputEndpoint.SetVolume0Command;
         SetOutputVolume30Command = OutputEndpoint.SetVolume30Command;
+        SetOutputVolume35Command = OutputEndpoint.SetVolume35Command;
+        SetOutputVolume40Command = OutputEndpoint.SetVolume40Command;
         SetOutputVolume45Command = OutputEndpoint.SetVolume45Command;
         SetOutputVolume60Command = OutputEndpoint.SetVolume60Command;
         SetInputVolume0Command = InputEndpoint.SetVolume0Command;
         SetInputVolume30Command = InputEndpoint.SetVolume30Command;
+        SetInputVolume35Command = InputEndpoint.SetVolume35Command;
+        SetInputVolume40Command = InputEndpoint.SetVolume40Command;
         SetInputVolume45Command = InputEndpoint.SetVolume45Command;
         SetInputVolume60Command = InputEndpoint.SetVolume60Command;
         ToggleCameraPreviewCommand = CameraPreview.TogglePreviewCommand;
@@ -118,6 +122,10 @@ public sealed class MainViewModel : ObservableObject, IAsyncDisposable
 
     public RelayCommand SetOutputVolume30Command { get; }
 
+    public RelayCommand SetOutputVolume35Command { get; }
+
+    public RelayCommand SetOutputVolume40Command { get; }
+
     public RelayCommand SetOutputVolume45Command { get; }
 
     public RelayCommand SetOutputVolume60Command { get; }
@@ -125,6 +133,10 @@ public sealed class MainViewModel : ObservableObject, IAsyncDisposable
     public RelayCommand SetInputVolume0Command { get; }
 
     public RelayCommand SetInputVolume30Command { get; }
+
+    public RelayCommand SetInputVolume35Command { get; }
+
+    public RelayCommand SetInputVolume40Command { get; }
 
     public RelayCommand SetInputVolume45Command { get; }
 

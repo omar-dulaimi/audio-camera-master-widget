@@ -11,6 +11,14 @@
                 Style="{StaticResource PresetButtonStyle}">
             <TextBlock Text="30%" />
         </Button>
+        <Button Command="{Binding ThirtyFiveCommand, ElementName=Root}"
+                Style="{StaticResource PresetButtonStyle}">
+            <TextBlock Text="35%" />
+        </Button>
+        <Button Command="{Binding FortyCommand, ElementName=Root}"
+                Style="{StaticResource PresetButtonStyle}">
+            <TextBlock Text="40%" />
+        </Button>
         <Button Command="{Binding FortyFiveCommand, ElementName=Root}"
                 Style="{StaticResource PresetButtonStyle}">
             <TextBlock Text="45%" />

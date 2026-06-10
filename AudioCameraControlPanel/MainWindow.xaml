@@ -252,6 +252,8 @@
                         <controls:VolumePresetStrip Grid.Column="1"
                                                      ZeroCommand="{Binding SetOutputVolume0Command}"
                                                      ThirtyCommand="{Binding SetOutputVolume30Command}"
+                                                     ThirtyFiveCommand="{Binding SetOutputVolume35Command}"
+                                                     FortyCommand="{Binding SetOutputVolume40Command}"
                                                      FortyFiveCommand="{Binding SetOutputVolume45Command}"
                                                      SixtyCommand="{Binding SetOutputVolume60Command}" />
                     </Grid>
@@ -379,6 +381,8 @@
                         <controls:VolumePresetStrip Grid.Column="1"
                                                      ZeroCommand="{Binding SetInputVolume0Command}"
                                                      ThirtyCommand="{Binding SetInputVolume30Command}"
+                                                     ThirtyFiveCommand="{Binding SetInputVolume35Command}"
+                                                     FortyCommand="{Binding SetInputVolume40Command}"
                                                      FortyFiveCommand="{Binding SetInputVolume45Command}"
                                                      SixtyCommand="{Binding SetInputVolume60Command}" />
                     </Grid>

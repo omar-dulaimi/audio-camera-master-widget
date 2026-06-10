@@ -38,6 +38,8 @@ public sealed class AudioEndpointViewModel : ObservableObject
         ToggleMuteCommand = new RelayCommand(ToggleMute, () => SelectedDevice is not null && CanControlMute);
         SetVolume0Command = new RelayCommand(() => SetVolumePreset(0), CanSetVolumePreset);
         SetVolume30Command = new RelayCommand(() => SetVolumePreset(30), CanSetVolumePreset);
+        SetVolume35Command = new RelayCommand(() => SetVolumePreset(35), CanSetVolumePreset);
+        SetVolume40Command = new RelayCommand(() => SetVolumePreset(40), CanSetVolumePreset);
         SetVolume45Command = new RelayCommand(() => SetVolumePreset(45), CanSetVolumePreset);
         SetVolume60Command = new RelayCommand(() => SetVolumePreset(60), CanSetVolumePreset);
     }
@@ -53,6 +55,10 @@ public sealed class AudioEndpointViewModel : ObservableObject
     public RelayCommand SetVolume0Command { get; }
 
     public RelayCommand SetVolume30Command { get; }
+
+    public RelayCommand SetVolume35Command { get; }
+
+    public RelayCommand SetVolume40Command { get; }
 
     public RelayCommand SetVolume45Command { get; }
 
@@ -272,7 +278,31 @@ public sealed class AudioEndpointViewModel : ObservableObject
 
     private void SetVolumePreset(double volumePercent)
     {
-        SelectedVolume = volumePercent;
+        var device = SelectedDevice;
+        if (device is null)
+        {
+            return;
+        }
+
+        // Write the volume immediately (bypassing the slider debounce) so the
+        // unmute below never plays audio at the previous volume.
+        CancelPendingVolumeSet();
+        _isUpdatingState = true;
+        try
+        {
+            SelectedVolume = volumePercent;
+        }
+        finally
+        {
+            _isUpdatingState = false;
+        }
+
+        SetVolumeCore(device.Id, volumePercent);
+
+        if (IsMuted && CanControlMute)
+        {
+            SetMuteState(false);
+        }
     }
 
     private bool CanSetVolumePreset()
@@ -284,6 +314,8 @@ public sealed class AudioEndpointViewModel : ObservableObject
     {
         SetVolume0Command.RaiseCanExecuteChanged();
         SetVolume30Command.RaiseCanExecuteChanged();
+        SetVolume35Command.RaiseCanExecuteChanged();
+        SetVolume40Command.RaiseCanExecuteChanged();
         SetVolume45Command.RaiseCanExecuteChanged();
         SetVolume60Command.RaiseCanExecuteChanged();
     }
