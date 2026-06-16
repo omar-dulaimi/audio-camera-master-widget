@@ -69,7 +69,8 @@ public sealed class InMemoryAppSettingsStore : IAppSettingsStore
         {
             LastOutputDeviceId = settings.LastOutputDeviceId,
             LastInputDeviceId = settings.LastInputDeviceId,
-            LastCameraDeviceId = settings.LastCameraDeviceId
+            LastCameraDeviceId = settings.LastCameraDeviceId,
+            VolumeStepPercent = settings.VolumeStepPercent
         };
     }
 }

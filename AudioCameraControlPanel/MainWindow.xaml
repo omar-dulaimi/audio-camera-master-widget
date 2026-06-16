@@ -286,7 +286,11 @@
                                                      ThirtyFiveCommand="{Binding SetOutputVolume35Command}"
                                                      FortyCommand="{Binding SetOutputVolume40Command}"
                                                      FortyFiveCommand="{Binding SetOutputVolume45Command}"
-                                                     SixtyCommand="{Binding SetOutputVolume60Command}" />
+                                                     SixtyCommand="{Binding SetOutputVolume60Command}"
+                                                     DecrementCommand="{Binding NudgeOutputDownCommand}"
+                                                     IncrementCommand="{Binding NudgeOutputUpCommand}"
+                                                     Step="{Binding VolumeStep, Mode=TwoWay}"
+                                                     StepOptions="{Binding VolumeStepOptions}" />
                     </Grid>
 
                     <Border Grid.Row="4"
@@ -415,7 +419,11 @@
                                                      ThirtyFiveCommand="{Binding SetInputVolume35Command}"
                                                      FortyCommand="{Binding SetInputVolume40Command}"
                                                      FortyFiveCommand="{Binding SetInputVolume45Command}"
-                                                     SixtyCommand="{Binding SetInputVolume60Command}" />
+                                                     SixtyCommand="{Binding SetInputVolume60Command}"
+                                                     DecrementCommand="{Binding NudgeInputDownCommand}"
+                                                     IncrementCommand="{Binding NudgeInputUpCommand}"
+                                                     Step="{Binding VolumeStep, Mode=TwoWay}"
+                                                     StepOptions="{Binding VolumeStepOptions}" />
                     </Grid>
 
                     <Grid Grid.Row="4" Margin="0,13,0,0">

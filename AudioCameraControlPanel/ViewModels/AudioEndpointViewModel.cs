@@ -315,6 +315,20 @@ public sealed class AudioEndpointViewModel : ObservableObject
         }
     }
 
+    public void AdjustVolume(double delta)
+    {
+        if (SelectedDevice is null || !CanControlVolume)
+        {
+            return;
+        }
+
+        // Nudge relative to the last known volume, clamped to the valid range.
+        // Reusing ApplyVolumePreset gives the immediate write and unmute-on-raise
+        // behaviour for free, matching how the absolute presets behave.
+        var target = Math.Clamp(SelectedVolume + delta, 0, 100);
+        ApplyVolumePreset(target);
+    }
+
     private bool CanSetVolumePreset()
     {
         return SelectedDevice is not null && CanControlVolume;

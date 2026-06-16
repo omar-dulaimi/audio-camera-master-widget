@@ -171,7 +171,11 @@
                                                          ThirtyFiveCommand="{Binding Main.SetOutputVolume35Command}"
                                                          FortyCommand="{Binding Main.SetOutputVolume40Command}"
                                                          FortyFiveCommand="{Binding Main.SetOutputVolume45Command}"
-                                                         SixtyCommand="{Binding Main.SetOutputVolume60Command}" />
+                                                         SixtyCommand="{Binding Main.SetOutputVolume60Command}"
+                                                         DecrementCommand="{Binding Main.NudgeOutputDownCommand}"
+                                                         IncrementCommand="{Binding Main.NudgeOutputUpCommand}"
+                                                         Step="{Binding Main.VolumeStep, Mode=TwoWay}"
+                                                         StepOptions="{Binding Main.VolumeStepOptions}" />
                         </Grid>
                     </Grid>
                 </Border>
@@ -254,7 +258,11 @@
                                                              ThirtyFiveCommand="{Binding Main.SetInputVolume35Command}"
                                                              FortyCommand="{Binding Main.SetInputVolume40Command}"
                                                              FortyFiveCommand="{Binding Main.SetInputVolume45Command}"
-                                                             SixtyCommand="{Binding Main.SetInputVolume60Command}" />
+                                                             SixtyCommand="{Binding Main.SetInputVolume60Command}"
+                                                             DecrementCommand="{Binding Main.NudgeInputDownCommand}"
+                                                             IncrementCommand="{Binding Main.NudgeInputUpCommand}"
+                                                             Step="{Binding Main.VolumeStep, Mode=TwoWay}"
+                                                             StepOptions="{Binding Main.VolumeStepOptions}" />
                             </Grid>
 
                             <TextBlock Grid.Row="2"
@@ -410,6 +418,10 @@
                                              FortyCommand="{Binding Main.SetOutputVolume40Command}"
                                              FortyFiveCommand="{Binding Main.SetOutputVolume45Command}"
                                              SixtyCommand="{Binding Main.SetOutputVolume60Command}"
+                                             DecrementCommand="{Binding Main.NudgeOutputDownCommand}"
+                                             IncrementCommand="{Binding Main.NudgeOutputUpCommand}"
+                                             Step="{Binding Main.VolumeStep, Mode=TwoWay}"
+                                             StepOptions="{Binding Main.VolumeStepOptions}"
                                              Margin="0,10,0,0" />
 
                 <StackPanel Grid.Row="3" Orientation="Horizontal" Margin="0,12,0,0">
@@ -479,6 +491,10 @@
                                              FortyCommand="{Binding Main.SetInputVolume40Command}"
                                              FortyFiveCommand="{Binding Main.SetInputVolume45Command}"
                                              SixtyCommand="{Binding Main.SetInputVolume60Command}"
+                                             DecrementCommand="{Binding Main.NudgeInputDownCommand}"
+                                             IncrementCommand="{Binding Main.NudgeInputUpCommand}"
+                                             Step="{Binding Main.VolumeStep, Mode=TwoWay}"
+                                             StepOptions="{Binding Main.VolumeStepOptions}"
                                              Margin="0,10,0,0" />
 
                 <Grid Grid.Row="3" Margin="0,12,0,0">

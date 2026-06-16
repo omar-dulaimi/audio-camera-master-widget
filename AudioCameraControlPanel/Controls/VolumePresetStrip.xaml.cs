@@ -1,3 +1,4 @@
+using System.Collections;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Input;
@@ -12,6 +13,20 @@ public partial class VolumePresetStrip : UserControl
     public static readonly DependencyProperty FortyCommandProperty = RegisterCommand(nameof(FortyCommand));
     public static readonly DependencyProperty FortyFiveCommandProperty = RegisterCommand(nameof(FortyFiveCommand));
     public static readonly DependencyProperty SixtyCommandProperty = RegisterCommand(nameof(SixtyCommand));
+    public static readonly DependencyProperty DecrementCommandProperty = RegisterCommand(nameof(DecrementCommand));
+    public static readonly DependencyProperty IncrementCommandProperty = RegisterCommand(nameof(IncrementCommand));
+
+    public static readonly DependencyProperty StepProperty = DependencyProperty.Register(
+        nameof(Step),
+        typeof(int),
+        typeof(VolumePresetStrip),
+        new FrameworkPropertyMetadata(5, FrameworkPropertyMetadataOptions.BindsTwoWayByDefault));
+
+    public static readonly DependencyProperty StepOptionsProperty = DependencyProperty.Register(
+        nameof(StepOptions),
+        typeof(IEnumerable),
+        typeof(VolumePresetStrip),
+        new PropertyMetadata(null));
 
     public VolumePresetStrip()
     {
@@ -52,6 +67,30 @@ public partial class VolumePresetStrip : UserControl
     {
         get => (ICommand?)GetValue(SixtyCommandProperty);
         set => SetValue(SixtyCommandProperty, value);
+    }
+
+    public ICommand? DecrementCommand
+    {
+        get => (ICommand?)GetValue(DecrementCommandProperty);
+        set => SetValue(DecrementCommandProperty, value);
+    }
+
+    public ICommand? IncrementCommand
+    {
+        get => (ICommand?)GetValue(IncrementCommandProperty);
+        set => SetValue(IncrementCommandProperty, value);
+    }
+
+    public int Step
+    {
+        get => (int)GetValue(StepProperty);
+        set => SetValue(StepProperty, value);
+    }
+
+    public IEnumerable? StepOptions
+    {
+        get => (IEnumerable?)GetValue(StepOptionsProperty);
+        set => SetValue(StepOptionsProperty, value);
     }
 
     private static DependencyProperty RegisterCommand(string propertyName)

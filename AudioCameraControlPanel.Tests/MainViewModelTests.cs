@@ -205,6 +205,115 @@ public sealed class MainViewModelTests
     }
 
     [TestMethod]
+    public async Task DefaultVolumeStepIsFivePercent()
+    {
+        var context = new TestContextBuilder()
+            .WithOutput("output-1", "Speakers", isDefault: true, volumePercent: 20, isMuted: false)
+            .Build();
+        await context.ViewModel.InitializeAsync();
+
+        Assert.AreEqual(5, context.ViewModel.VolumeStep);
+    }
+
+    [TestMethod]
+    public async Task NudgeOutputUpRaisesVolumeBySavedStep()
+    {
+        var context = new TestContextBuilder()
+            .WithOutput("output-1", "Speakers", isDefault: true, volumePercent: 20, isMuted: false)
+            .Build();
+        await context.ViewModel.InitializeAsync();
+
+        context.ViewModel.NudgeOutputUpCommand.Execute(null);
+
+        Assert.AreEqual(25, context.ViewModel.SelectedOutputVolume);
+        Assert.AreEqual(25, context.Audio.EndpointStates["output-1"].VolumePercent);
+    }
+
+    [TestMethod]
+    public async Task NudgeOutputDownReachesVolumesBelowLowestPreset()
+    {
+        // The lowest absolute preset is 30%; nudging is how you get below 10% at night.
+        var context = new TestContextBuilder()
+            .WithOutput("output-1", "Speakers", isDefault: true, volumePercent: 8, isMuted: false)
+            .Build();
+        await context.ViewModel.InitializeAsync();
+
+        context.ViewModel.NudgeOutputDownCommand.Execute(null);
+
+        Assert.AreEqual(3, context.ViewModel.SelectedOutputVolume);
+        Assert.AreEqual(3, context.Audio.EndpointStates["output-1"].VolumePercent);
+    }
+
+    [TestMethod]
+    public async Task NudgeDownClampsAtZero()
+    {
+        var context = new TestContextBuilder()
+            .WithOutput("output-1", "Speakers", isDefault: true, volumePercent: 3, isMuted: false)
+            .Build();
+        await context.ViewModel.InitializeAsync();
+
+        context.ViewModel.NudgeOutputDownCommand.Execute(null);
+
+        Assert.AreEqual(0, context.ViewModel.SelectedOutputVolume);
+    }
+
+    [TestMethod]
+    public async Task NudgeUpClampsAtHundred()
+    {
+        var context = new TestContextBuilder()
+            .WithInput("input-1", "Mic", isDefault: true, volumePercent: 98, isMuted: false)
+            .Build();
+        await context.ViewModel.InitializeAsync();
+
+        context.ViewModel.NudgeInputUpCommand.Execute(null);
+
+        Assert.AreEqual(100, context.ViewModel.SelectedInputVolume);
+    }
+
+    [TestMethod]
+    public async Task ChangingVolumeStepChangesNudgeAmountAndPersists()
+    {
+        var context = new TestContextBuilder()
+            .WithOutput("output-1", "Speakers", isDefault: true, volumePercent: 20, isMuted: false)
+            .Build();
+        await context.ViewModel.InitializeAsync();
+
+        context.ViewModel.VolumeStep = 10;
+        context.ViewModel.NudgeOutputDownCommand.Execute(null);
+
+        Assert.AreEqual(10, context.Audio.EndpointStates["output-1"].VolumePercent);
+
+        await context.ViewModel.DisposeAsync();
+        Assert.AreEqual(10, context.SettingsStore.LastSavedSettings?.VolumeStepPercent);
+    }
+
+    [TestMethod]
+    public async Task VolumeStepSnapsToNearestSupportedChoice()
+    {
+        var context = new TestContextBuilder().Build();
+        await context.ViewModel.InitializeAsync();
+
+        context.ViewModel.VolumeStep = 3;
+
+        Assert.AreEqual(2, context.ViewModel.VolumeStep);
+    }
+
+    [TestMethod]
+    public async Task InitializeRestoresSavedVolumeStep()
+    {
+        var context = new TestContextBuilder()
+            .WithOutput("output-1", "Speakers", isDefault: true, volumePercent: 20, isMuted: false)
+            .WithSettings(new AppSettings { LastOutputDeviceId = "output-1", VolumeStepPercent = 2 })
+            .Build();
+        await context.ViewModel.InitializeAsync();
+
+        Assert.AreEqual(2, context.ViewModel.VolumeStep);
+
+        context.ViewModel.NudgeOutputUpCommand.Execute(null);
+        Assert.AreEqual(22, context.ViewModel.SelectedOutputVolume);
+    }
+
+    [TestMethod]
     public async Task MuteAllOnlyTouchesEndpointsThatSupportMute()
     {
         var context = new TestContextBuilder()

@@ -7,4 +7,6 @@ public sealed class AppSettings
     public string? LastInputDeviceId { get; set; }
 
     public string? LastCameraDeviceId { get; set; }
+
+    public int? VolumeStepPercent { get; set; }
 }

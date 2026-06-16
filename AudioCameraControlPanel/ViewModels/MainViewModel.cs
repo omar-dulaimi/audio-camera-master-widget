@@ -20,6 +20,10 @@ public sealed class MainViewModel : ObservableObject, IAsyncDisposable
     private CancellationTokenSource? _settingsSaveDebounce;
     private Task _pendingSettingsSaveTask = Task.CompletedTask;
 
+    private const int DefaultVolumeStepPercent = 5;
+    private static readonly int[] VolumeStepChoices = { 1, 2, 5, 10 };
+    private int _volumeStepPercent = DefaultVolumeStepPercent;
+
     public event EventHandler<CompactWidgetKind>? CompactWidgetRequested;
 
     public event EventHandler? ControlPanelRequested;
@@ -49,6 +53,10 @@ public sealed class MainViewModel : ObservableObject, IAsyncDisposable
         ApplyMeetingPresetCommand = new RelayCommand(ApplyMeetingPreset, CanApplyScenarioPreset);
         ApplyPrivatePresetCommand = new RelayCommand(ApplyPrivatePreset, CanApplyScenarioPreset);
         ApplyMediaPresetCommand = new RelayCommand(ApplyMediaPreset, CanApplyScenarioPreset);
+        NudgeOutputDownCommand = new RelayCommand(() => OutputEndpoint.AdjustVolume(-VolumeStep), () => CanControlOutputVolume);
+        NudgeOutputUpCommand = new RelayCommand(() => OutputEndpoint.AdjustVolume(VolumeStep), () => CanControlOutputVolume);
+        NudgeInputDownCommand = new RelayCommand(() => InputEndpoint.AdjustVolume(-VolumeStep), () => CanControlInputVolume);
+        NudgeInputUpCommand = new RelayCommand(() => InputEndpoint.AdjustVolume(VolumeStep), () => CanControlInputVolume);
 
         ToggleOutputMuteCommand = OutputEndpoint.ToggleMuteCommand;
         ToggleInputMuteCommand = InputEndpoint.ToggleMuteCommand;
@@ -124,6 +132,34 @@ public sealed class MainViewModel : ObservableObject, IAsyncDisposable
     public RelayCommand ApplyPrivatePresetCommand { get; }
 
     public RelayCommand ApplyMediaPresetCommand { get; }
+
+    public RelayCommand NudgeOutputDownCommand { get; }
+
+    public RelayCommand NudgeOutputUpCommand { get; }
+
+    public RelayCommand NudgeInputDownCommand { get; }
+
+    public RelayCommand NudgeInputUpCommand { get; }
+
+    public IReadOnlyList<int> VolumeStepOptions => VolumeStepChoices;
+
+    /// <summary>
+    /// Fixed amount (in percent) that the +/- nudge buttons add or remove from the
+    /// current endpoint volume. Shared across both endpoints and persisted.
+    /// </summary>
+    public int VolumeStep
+    {
+        get => _volumeStepPercent;
+        set
+        {
+            var normalized = NormalizeVolumeStep(value);
+            if (SetProperty(ref _volumeStepPercent, normalized))
+            {
+                _appSettings.VolumeStepPercent = normalized;
+                _ = QueueSaveSettingsAsync();
+            }
+        }
+    }
 
     public AsyncRelayCommand RefreshAllDevicesCommand { get; }
 
@@ -246,7 +282,30 @@ public sealed class MainViewModel : ObservableObject, IAsyncDisposable
     public async Task InitializeAsync()
     {
         _appSettings = await _settingsStore.LoadAsync();
+
+        // Apply the saved step without going through the property setter so we
+        // don't queue a redundant save during start-up.
+        _volumeStepPercent = NormalizeVolumeStep(_appSettings.VolumeStepPercent ?? DefaultVolumeStepPercent);
+        _appSettings.VolumeStepPercent = _volumeStepPercent;
+        OnPropertyChanged(nameof(VolumeStep));
+
         await RefreshAllDevicesAsync();
+    }
+
+    private static int NormalizeVolumeStep(int value)
+    {
+        // Snap to the nearest supported choice so the picker always has a
+        // matching selection, even if the file was hand-edited.
+        var nearest = VolumeStepChoices[0];
+        foreach (var choice in VolumeStepChoices)
+        {
+            if (Math.Abs(choice - value) < Math.Abs(nearest - value))
+            {
+                nearest = choice;
+            }
+        }
+
+        return nearest;
     }
 
     public async ValueTask DisposeAsync()
@@ -321,6 +380,18 @@ public sealed class MainViewModel : ObservableObject, IAsyncDisposable
         ApplyMeetingPresetCommand.RaiseCanExecuteChanged();
         ApplyPrivatePresetCommand.RaiseCanExecuteChanged();
         ApplyMediaPresetCommand.RaiseCanExecuteChanged();
+    }
+
+    private void RaiseOutputNudgeCanExecuteChanged()
+    {
+        NudgeOutputDownCommand.RaiseCanExecuteChanged();
+        NudgeOutputUpCommand.RaiseCanExecuteChanged();
+    }
+
+    private void RaiseInputNudgeCanExecuteChanged()
+    {
+        NudgeInputDownCommand.RaiseCanExecuteChanged();
+        NudgeInputUpCommand.RaiseCanExecuteChanged();
     }
 
     private void MuteAll()
@@ -412,6 +483,7 @@ public sealed class MainViewModel : ObservableObject, IAsyncDisposable
             case nameof(AudioEndpointViewModel.SelectedDevice):
                 OnPropertyChanged(nameof(SelectedOutputDevice));
                 MuteAllCommand.RaiseCanExecuteChanged();
+                RaiseOutputNudgeCanExecuteChanged();
                 break;
             case nameof(AudioEndpointViewModel.SelectedVolume):
                 OnPropertyChanged(nameof(SelectedOutputVolume));
@@ -422,6 +494,7 @@ public sealed class MainViewModel : ObservableObject, IAsyncDisposable
             case nameof(AudioEndpointViewModel.CanControlVolume):
                 OnPropertyChanged(nameof(CanControlOutputVolume));
                 RaiseScenarioPresetCanExecuteChanged();
+                RaiseOutputNudgeCanExecuteChanged();
                 break;
             case nameof(AudioEndpointViewModel.CanControlMute):
                 OnPropertyChanged(nameof(CanControlOutputMute));
@@ -447,6 +520,7 @@ public sealed class MainViewModel : ObservableObject, IAsyncDisposable
             case nameof(AudioEndpointViewModel.SelectedDevice):
                 OnPropertyChanged(nameof(SelectedInputDevice));
                 MuteAllCommand.RaiseCanExecuteChanged();
+                RaiseInputNudgeCanExecuteChanged();
                 break;
             case nameof(AudioEndpointViewModel.SelectedVolume):
                 OnPropertyChanged(nameof(SelectedInputVolume));
@@ -457,6 +531,7 @@ public sealed class MainViewModel : ObservableObject, IAsyncDisposable
             case nameof(AudioEndpointViewModel.CanControlVolume):
                 OnPropertyChanged(nameof(CanControlInputVolume));
                 RaiseScenarioPresetCanExecuteChanged();
+                RaiseInputNudgeCanExecuteChanged();
                 break;
             case nameof(AudioEndpointViewModel.CanControlMute):
                 OnPropertyChanged(nameof(CanControlInputMute));
