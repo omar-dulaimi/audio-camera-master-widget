@@ -108,30 +108,55 @@
                     Style="{StaticResource ModuleBorderStyle}"
                     Padding="12"
                     Margin="0,0,0,12">
-                <StackPanel Orientation="Horizontal">
-                    <TextBlock Text="Quick presets"
-                               Style="{StaticResource CaptionStyle}"
-                               VerticalAlignment="Center"
-                               Margin="0,0,12,0" />
-                    <Button Command="{Binding ApplyMeetingPresetCommand}">
-                        <StackPanel Orientation="Horizontal">
-                            <TextBlock Text="&#xE716;" Style="{StaticResource IconStyle}" />
-                            <TextBlock Text="Meeting" />
-                        </StackPanel>
-                    </Button>
-                    <Button Command="{Binding ApplyPrivatePresetCommand}">
-                        <StackPanel Orientation="Horizontal">
-                            <TextBlock Text="&#xE72E;" Style="{StaticResource IconStyle}" />
-                            <TextBlock Text="Private" />
-                        </StackPanel>
-                    </Button>
-                    <Button Command="{Binding ApplyMediaPresetCommand}" Margin="0">
-                        <StackPanel Orientation="Horizontal">
-                            <TextBlock Text="&#xE8D6;" Style="{StaticResource IconStyle}" />
-                            <TextBlock Text="Media" />
-                        </StackPanel>
-                    </Button>
-                </StackPanel>
+                <Grid>
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="*" />
+                        <ColumnDefinition Width="Auto" />
+                    </Grid.ColumnDefinitions>
+
+                    <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
+                        <TextBlock Text="Quick presets"
+                                   Style="{StaticResource CaptionStyle}"
+                                   VerticalAlignment="Center"
+                                   Margin="0,0,12,0" />
+                        <Button Command="{Binding ApplyMeetingPresetCommand}">
+                            <StackPanel Orientation="Horizontal">
+                                <TextBlock Text="&#xE716;" Style="{StaticResource IconStyle}" />
+                                <TextBlock Text="Meeting" />
+                            </StackPanel>
+                        </Button>
+                        <Button Command="{Binding ApplyPrivatePresetCommand}">
+                            <StackPanel Orientation="Horizontal">
+                                <TextBlock Text="&#xE72E;" Style="{StaticResource IconStyle}" />
+                                <TextBlock Text="Private" />
+                            </StackPanel>
+                        </Button>
+                        <Button Command="{Binding ApplyMediaPresetCommand}" Margin="0">
+                            <StackPanel Orientation="Horizontal">
+                                <TextBlock Text="&#xE8D6;" Style="{StaticResource IconStyle}" />
+                                <TextBlock Text="Media" />
+                            </StackPanel>
+                        </Button>
+                    </StackPanel>
+
+                    <StackPanel Grid.Column="1"
+                                MaxWidth="340"
+                                Margin="18,0,0,0"
+                                VerticalAlignment="Center">
+                        <CheckBox IsChecked="{Binding StartWithWindows, Mode=TwoWay}"
+                                  HorizontalAlignment="Right"
+                                  ToolTip="Register this app in the current user's Windows startup apps">
+                            <StackPanel Orientation="Horizontal">
+                                <TextBlock Text="&#xE823;" Style="{StaticResource IconStyle}" />
+                                <TextBlock Text="Start with Windows" />
+                            </StackPanel>
+                        </CheckBox>
+                        <TextBlock Text="{Binding StartupStatusText}"
+                                   Style="{StaticResource CaptionStyle}"
+                                   TextAlignment="Right"
+                                   Margin="24,3,0,0" />
+                    </StackPanel>
+                </Grid>
             </Border>
 
             <Grid Grid.Row="2" Margin="0,0,0,12">

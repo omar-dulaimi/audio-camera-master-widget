@@ -1,6 +1,7 @@
 using System.Collections.ObjectModel;
 using System.ComponentModel;
 using System.IO;
+using System.Security;
 using System.Windows;
 using System.Windows.Media.Imaging;
 using System.Windows.Threading;
@@ -13,6 +14,7 @@ public sealed class MainViewModel : ObservableObject, IAsyncDisposable
 {
     private readonly IAudioDeviceService _audioDeviceService;
     private readonly IAppSettingsStore _settingsStore;
+    private readonly IStartupRegistrationService _startupRegistrationService;
     private readonly DispatcherTimer _inputMeterTimer;
     private readonly TimeSpan _settingsSaveDelay;
     private readonly object _settingsSaveSync = new();
@@ -23,6 +25,8 @@ public sealed class MainViewModel : ObservableObject, IAsyncDisposable
     private const int DefaultVolumeStepPercent = 5;
     private static readonly int[] VolumeStepChoices = { 1, 2, 5, 10 };
     private int _volumeStepPercent = DefaultVolumeStepPercent;
+    private bool _startWithWindows;
+    private string _startupStatusText = "Windows startup setting has not been checked yet.";
 
     public event EventHandler<CompactWidgetKind>? CompactWidgetRequested;
 
@@ -33,11 +37,13 @@ public sealed class MainViewModel : ObservableObject, IAsyncDisposable
         ICameraDeviceService cameraDeviceService,
         ISettingsLauncherService settingsLauncherService,
         IAppSettingsStore settingsStore,
+        IStartupRegistrationService startupRegistrationService,
         TimeSpan? settingsSaveDelay = null,
         TimeSpan? volumeSetDelay = null)
     {
         _audioDeviceService = audioDeviceService;
         _settingsStore = settingsStore;
+        _startupRegistrationService = startupRegistrationService;
         _settingsSaveDelay = settingsSaveDelay ?? TimeSpan.FromMilliseconds(250);
 
         OutputEndpoint = new AudioEndpointViewModel(audioDeviceService, AudioDirection.Output, volumeSetDelay);
@@ -159,6 +165,36 @@ public sealed class MainViewModel : ObservableObject, IAsyncDisposable
                 _ = QueueSaveSettingsAsync();
             }
         }
+    }
+
+    public bool StartWithWindows
+    {
+        get => _startWithWindows;
+        set
+        {
+            if (_startWithWindows == value)
+            {
+                return;
+            }
+
+            try
+            {
+                _startupRegistrationService.SetEnabled(value);
+                SetProperty(ref _startWithWindows, value);
+                SetStartupStatusText(value);
+            }
+            catch (Exception ex) when (IsStartupRegistrationException(ex))
+            {
+                StartupStatusText = $"Unable to update Windows startup setting. {ex.Message}";
+                OnPropertyChanged(nameof(StartWithWindows));
+            }
+        }
+    }
+
+    public string StartupStatusText
+    {
+        get => _startupStatusText;
+        private set => SetProperty(ref _startupStatusText, value);
     }
 
     public AsyncRelayCommand RefreshAllDevicesCommand { get; }
@@ -289,6 +325,8 @@ public sealed class MainViewModel : ObservableObject, IAsyncDisposable
         _appSettings.VolumeStepPercent = _volumeStepPercent;
         OnPropertyChanged(nameof(VolumeStep));
 
+        RefreshStartupRegistration();
+
         await RefreshAllDevicesAsync();
     }
 
@@ -306,6 +344,37 @@ public sealed class MainViewModel : ObservableObject, IAsyncDisposable
         }
 
         return nearest;
+    }
+
+    private void RefreshStartupRegistration()
+    {
+        try
+        {
+            var enabled = _startupRegistrationService.IsEnabled();
+            if (_startWithWindows != enabled)
+            {
+                _startWithWindows = enabled;
+                OnPropertyChanged(nameof(StartWithWindows));
+            }
+
+            SetStartupStatusText(enabled);
+        }
+        catch (Exception ex) when (IsStartupRegistrationException(ex))
+        {
+            StartupStatusText = $"Unable to read Windows startup setting. {ex.Message}";
+        }
+    }
+
+    private void SetStartupStatusText(bool enabled)
+    {
+        StartupStatusText = enabled
+            ? "Audio Camera Master Widget will open when you sign in."
+            : "Audio Camera Master Widget will not open automatically.";
+    }
+
+    private static bool IsStartupRegistrationException(Exception exception)
+    {
+        return exception is IOException or UnauthorizedAccessException or SecurityException;
     }
 
     public async ValueTask DisposeAsync()

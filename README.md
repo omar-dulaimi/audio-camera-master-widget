@@ -4,6 +4,34 @@ Windows WPF app for local audio endpoint controls, microphone metering, camera p
 
 The app starts with the compact master widget. The full control panel opens from the widget.
 
+## Repository Layout
+
+The application source lives in:
+
+```text
+AudioCameraControlPanel\
+```
+
+The solution and tests live in:
+
+```text
+AudioCameraControlPanel.sln
+AudioCameraControlPanel.Tests\
+```
+
+The local installer assets live in:
+
+```text
+installer\AudioCameraMasterWidget.nsi
+scripts\build-installer.ps1
+```
+
+Generated local builds are ignored by git and live under:
+
+```text
+artifacts\
+```
+
 ## Install
 
 Download the installer from GitHub Releases:
@@ -83,7 +111,9 @@ The app and installer are unsigned. Windows Application Control, Smart App Contr
 - Reads endpoint volume and mute state when available.
 - Sets endpoint volume and mute state when available.
 - Provides 0%, 30%, 35%, 40%, 45%, and 60% volume preset buttons. Clicking a preset also unmutes the endpoint.
+- Provides configurable +/- volume nudges with 1%, 2%, 5%, and 10% step sizes.
 - Provides Meeting (mic 40%, output 45%), Private (both muted at 0%), and Media (mic muted at 0%, output 35%) quick presets.
+- Can register itself to start automatically when the current user signs in to Windows.
 - Shows a live microphone peak meter when available.
 - Lists local cameras.
 - Starts and stops local camera preview.
@@ -98,7 +128,13 @@ Settings are stored at:
 %LOCALAPPDATA%\AudioCameraControlPanel\settings.json
 ```
 
-The settings file stores device IDs only. It does not store audio, video, or images.
+The settings file stores device IDs and the volume step percentage only. It does not store audio, video, or images.
+
+The **Start with Windows** option writes a per-user startup entry here:
+
+```text
+HKCU\Software\Microsoft\Windows\CurrentVersion\Run\AudioCameraMasterWidget
+```
 
 ## Developer Prerequisites
 
@@ -158,6 +194,20 @@ Self-contained publish output:
 ```text
 artifacts\publish-win-x64
 ```
+
+Runnable local build:
+
+```text
+artifacts\publish-win-x64\AudioCameraMasterWidget.exe
+```
+
+Installed app after running the installer:
+
+```text
+%LOCALAPPDATA%\Programs\AudioCameraMasterWidget\AudioCameraMasterWidget.exe
+```
+
+To avoid mistaking stale outputs for the latest source, delete the contents of `artifacts\` before rebuilding.
 
 `scripts\build-installer.ps1` looks for `makensis.exe` in:
 

@@ -314,6 +314,65 @@ public sealed class MainViewModelTests
     }
 
     [TestMethod]
+    public async Task InitializeAsyncReflectsWindowsStartupRegistration()
+    {
+        var context = new TestContextBuilder()
+            .WithStartWithWindows(true)
+            .Build();
+
+        await context.ViewModel.InitializeAsync();
+
+        Assert.IsTrue(context.ViewModel.StartWithWindows);
+        StringAssert.Contains(context.ViewModel.StartupStatusText, "will open when you sign in");
+    }
+
+    [TestMethod]
+    public async Task SettingStartWithWindowsRegistersAppForStartup()
+    {
+        var context = new TestContextBuilder().Build();
+        await context.ViewModel.InitializeAsync();
+
+        context.ViewModel.StartWithWindows = true;
+
+        Assert.IsTrue(context.ViewModel.StartWithWindows);
+        Assert.IsTrue(context.StartupRegistration.IsEnabledValue);
+        CollectionAssert.AreEqual(new[] { true }, context.StartupRegistration.SetEnabledCalls);
+        StringAssert.Contains(context.ViewModel.StartupStatusText, "will open when you sign in");
+    }
+
+    [TestMethod]
+    public async Task ClearingStartWithWindowsRemovesStartupRegistration()
+    {
+        var context = new TestContextBuilder()
+            .WithStartWithWindows(true)
+            .Build();
+        await context.ViewModel.InitializeAsync();
+
+        context.ViewModel.StartWithWindows = false;
+
+        Assert.IsFalse(context.ViewModel.StartWithWindows);
+        Assert.IsFalse(context.StartupRegistration.IsEnabledValue);
+        CollectionAssert.AreEqual(new[] { false }, context.StartupRegistration.SetEnabledCalls);
+        StringAssert.Contains(context.ViewModel.StartupStatusText, "will not open automatically");
+    }
+
+    [TestMethod]
+    public async Task StartupRegistrationFailureLeavesToggleUnchangedAndReportsStatus()
+    {
+        var context = new TestContextBuilder()
+            .WithStartupRegistrationWriteException(new UnauthorizedAccessException("registry denied"))
+            .Build();
+        await context.ViewModel.InitializeAsync();
+
+        context.ViewModel.StartWithWindows = true;
+
+        Assert.IsFalse(context.ViewModel.StartWithWindows);
+        Assert.IsFalse(context.StartupRegistration.IsEnabledValue);
+        StringAssert.Contains(context.ViewModel.StartupStatusText, "Unable to update Windows startup setting.");
+        StringAssert.Contains(context.ViewModel.StartupStatusText, "registry denied");
+    }
+
+    [TestMethod]
     public async Task MuteAllOnlyTouchesEndpointsThatSupportMute()
     {
         var context = new TestContextBuilder()
@@ -526,6 +585,7 @@ public sealed class MainViewModelTests
         private readonly FakeCameraDeviceService _camera = new();
         private readonly FakeSettingsLauncherService _settingsLauncher = new();
         private readonly InMemoryAppSettingsStore _settingsStore = new();
+        private readonly FakeStartupRegistrationService _startupRegistration = new();
         private readonly TimeSpan _settingsSaveDelay;
         private readonly TimeSpan _volumeSetDelay;
 
@@ -586,6 +646,18 @@ public sealed class MainViewModelTests
             return this;
         }
 
+        public TestContextBuilder WithStartWithWindows(bool enabled)
+        {
+            _startupRegistration.IsEnabledValue = enabled;
+            return this;
+        }
+
+        public TestContextBuilder WithStartupRegistrationWriteException(Exception exception)
+        {
+            _startupRegistration.WriteException = exception;
+            return this;
+        }
+
         public TestContext Build()
         {
             return new TestContext(
@@ -593,11 +665,13 @@ public sealed class MainViewModelTests
                 _camera,
                 _settingsLauncher,
                 _settingsStore,
+                _startupRegistration,
                 new MainViewModel(
                     _audio,
                     _camera,
                     _settingsLauncher,
                     _settingsStore,
+                    _startupRegistration,
                     _settingsSaveDelay,
                     _volumeSetDelay));
         }
@@ -608,6 +682,7 @@ public sealed class MainViewModelTests
         FakeCameraDeviceService Camera,
         FakeSettingsLauncherService SettingsLauncher,
         InMemoryAppSettingsStore SettingsStore,
+        FakeStartupRegistrationService StartupRegistration,
         MainViewModel ViewModel);
 
     private static BitmapSource CreateTestFrame()

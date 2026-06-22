@@ -22,7 +22,8 @@ public partial class App : Application
             new AudioDeviceService(),
             new CameraDeviceService(),
             new SettingsLauncherService(),
-            new JsonAppSettingsStore());
+            new JsonAppSettingsStore(),
+            new WindowsStartupRegistrationService());
 
         _masterWidget = new CompactWidgetWindow(_viewModel, CompactWidgetKind.Master)
         {
